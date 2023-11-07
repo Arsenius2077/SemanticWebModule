@@ -1,0 +1,10 @@
+PREFIX dbpedia-owl: <http://dbpedia.org/ontology/>
+
+SELECT ?city
+WHERE {
+    ?city a dbpedia-owl:City ;
+          dbpedia-owl:country <http://dbpedia.org/resource/Ukraine> ;
+          dbpedia-owl:foundingDate ?date .
+}
+ORDER BY ?date
+LIMIT 1
