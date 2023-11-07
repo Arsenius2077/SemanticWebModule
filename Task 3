@@ -1,0 +1,38 @@
+from SPARQLWrapper import SPARQLWrapper, JSON
+
+
+sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+
+
+query = """
+SELECT ?company ?companyLabel ?foundationDate WHERE {
+  ?company wdt:P31 wd:Q4830453;       # Instance of enterprise
+           wdt:P17 wd:Q212;           # Country Ukraine
+           OPTIONAL { ?company wdt:P571 ?foundationDate. }  # Inception date
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+}
+ORDER BY ?foundationDate
+LIMIT 100
+"""
+
+sparql.setQuery(query)
+sparql.setReturnFormat(JSON)
+
+try:
+   
+    print("Running SPARQL query...")
+  
+    results = sparql.query().convert()
+
+    if results["results"]["bindings"]:
+        # Process results
+        for result in results["results"]["bindings"]:
+            company_name = result["companyLabel"]["value"]
+            foundation_date = result.get("foundationDate", {}).get("value", "Unknown date")
+            print(f"Company: {company_name}, Founded on: {foundation_date}")
+    else:
+    
+        print("No results found for the query.")
+
+except Exception as e:
+    print(f"An error occurred: {e}")
