@@ -1,0 +1,32 @@
+from rdflib import Graph
+
+g = Graph()
+
+g.parse("countrues_info.ttl", format="turtle")
+
+query = """
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT ?country_name ?Country_Neighbour ?population WHERE {
+    ?country a <http://schema.org/Country> ;
+             <http://schema.org/containedInPlace> "Europe" ;
+             <http://schema.org/name> ?country_name ;
+             <http://schema.org/hasCountryNeighbour> ?neighbour.
+
+    ?neighbour <http://schema.org/name> ?Country_Neighbour ;
+               <http://schema.org/population> ?population.
+
+    # Sub-query to find the neighbour with the maximum population
+    {
+        SELECT ?country (MAX(?population) AS ?maxPopulation) WHERE {
+            ?country a <http://schema.org/Country> ;
+                     <http://schema.org/containedInPlace> "Europe" ;
+                     <http://schema.org/hasCountryNeighbour> ?neighbour.
+            ?neighbour <http://schema.org/population> ?population.
+        } GROUP BY ?country
+    }
+} ORDER BY ?country_name
+"""
+
+for row in g.query(query):
+    print(
+        f"Country: {row.country_name}, Neighbouring Country with Largest Population: {row.Country_Neighbour}, Population: {row.population}")
